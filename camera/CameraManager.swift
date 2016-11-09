@@ -189,8 +189,14 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     private var maxZoomScale    = CGFloat(1.0)
 
     private var tempFilePath: NSURL = {
+        let dirPath = NSTemporaryDirectory().stringByAppendingString("/recordings/")
+        do {
+            try NSFileManager.defaultManager().createDirectoryAtPath(dirPath, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            print(error.localizedDescription);
+        }
         let uuid = NSUUID().UUIDString
-        let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(uuid).URLByAppendingPathExtension("mp4").absoluteString
+        let tempPath = NSURL(fileURLWithPath:dirPath).URLByAppendingPathComponent(uuid).URLByAppendingPathExtension("mp4").absoluteString
         if NSFileManager.defaultManager().fileExistsAtPath(tempPath) {
             do {
                 try NSFileManager.defaultManager().removeItemAtPath(tempPath)
