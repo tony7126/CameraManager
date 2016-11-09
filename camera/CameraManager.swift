@@ -189,7 +189,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     private var maxZoomScale    = CGFloat(1.0)
 
     private var tempFilePath: NSURL = {
-        let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent("tempMovie").URLByAppendingPathExtension("mp4").absoluteString
+        let uuid = NSUUID().UUIDString
+        let tempPath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(uuid).URLByAppendingPathExtension("mp4").absoluteString
         if NSFileManager.defaultManager().fileExistsAtPath(tempPath) {
             do {
                 try NSFileManager.defaultManager().removeItemAtPath(tempPath)
@@ -423,6 +424,7 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     public func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
         _updateTorch(.Off)
         if (error != nil) {
+            self._executeVideoCompletitionWithURL(nil, error: error)
             _show(NSLocalizedString("Unable to save video to the iPhone", comment:""), message: error.localizedDescription)
         } else {
             if let validLibrary = library {
@@ -432,8 +434,8 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
                             self._show(NSLocalizedString("Unable to save video to the iPhone.", comment:""), message: error!.localizedDescription)
                             self._executeVideoCompletitionWithURL(nil, error: error)
                         } else {
-                            if let validAssetURL = assetURL {
-                                self._executeVideoCompletitionWithURL(validAssetURL, error: error)
+                            if let _ = assetURL {
+                                self._executeVideoCompletitionWithURL(outputFileURL, error: error)
                             }
                         }
                     })
