@@ -154,11 +154,12 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     /// Property to check video recording file size when in progress
     public var recordedFileSize : Int64 { return movieOutput?.recordedFileSize ?? 0 }
 
+    // Property to set a video completion function
+    public var videoCompletition: ((videoURL: NSURL?, error: NSError?) -> Void)?
     
     // MARK: - Private properties
 
     private weak var embeddingView: UIView?
-    private var videoCompletition: ((videoURL: NSURL?, error: NSError?) -> Void)?
 
     private var sessionQueue: dispatch_queue_t = dispatch_queue_create("CameraSessionQueue", DISPATCH_QUEUE_SERIAL)
 
@@ -379,10 +380,13 @@ public class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGe
     /**
     Stop recording a video. Save it to the cameraRoll and give back the url.
     */
-    public func stopRecordingVideo(completition:(videoURL: NSURL?, error: NSError?) -> Void) {
+    public func stopRecordingVideo(completition:((videoURL: NSURL?, error: NSError?) -> Void)?) {
         if let runningMovieOutput = movieOutput {
             if runningMovieOutput.recording {
-                videoCompletition = completition
+                if completition != nil {
+                    videoCompletition = completition
+                }
+                
                 runningMovieOutput.stopRecording()
             }
         }
